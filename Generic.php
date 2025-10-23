@@ -1374,7 +1374,7 @@ class Generic
         if (!is_numeric($timeDifference))
         {
             $localTime = time();
-            $product = \Stripe\Product::create([
+            $product = $this->getConfig()->getStripeClient()->products->create([
                'name' => 'Time Query',
                'type' => 'service'
             ]);
