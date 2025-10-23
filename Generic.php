@@ -1150,6 +1150,8 @@ class Generic
 
     public function assignPaymentData($payment, $data)
     {
+        $config = $this->getConfig();
+
         $this->resetPaymentData($payment);
 
         if ($this->isMultiShipping())
@@ -1197,8 +1199,6 @@ class Generic
             if (isset($data['save_payment_method']) && $data['save_payment_method'])
                 $payment->setAdditionalInformation('save_payment_method', true);
 
-            $config = $this->getConfig();
-
             if ($config->reCheckCVCForSavedCards())
             {
                 $payment->setAdditionalInformation('cvc_token', null);
@@ -1235,6 +1235,16 @@ class Generic
 
         if (!empty($data['is_migrated_subscription']))
             $payment->setAdditionalInformation('is_migrated_subscription', true);
+
+
+        // Set additional information on payment only if one of the options from the modal was selected. We determine
+        // by checking if the data coming back from JS is a string.
+        if ($config->isMsiEnabled() &&
+            !empty($data['selected_installment_plan']) &&
+            is_string($data['selected_installment_plan'])
+        ) {
+            $payment->setAdditionalInformation('selected_installment_plan', $data['selected_installment_plan']);
+        }
     }
 
     /**
