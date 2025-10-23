@@ -52,7 +52,6 @@ class Generic
     private $sessionManager;
     private $multishippingQuoteFactory;
     private $productMetadata;
-    private $restController;
     private $logger;
     private $configFactory;
     private $stripePaymentMethodFactory;
@@ -61,6 +60,7 @@ class Generic
     private $tokenHelper;
     private $checkoutFlow;
     private $currencyHelper;
+    private $errorHelper;
     private $config = null;
 
     public function __construct(
@@ -108,7 +108,7 @@ class Generic
         \StripeIntegration\Payments\Helper\Token $tokenHelper,
         \StripeIntegration\Payments\Model\ConfigFactory $configFactory,
         \StripeIntegration\Payments\Model\Stripe\PaymentMethodFactory $stripePaymentMethodFactory,
-        \StripeIntegration\Payments\Plugin\Webapi\Controller\Rest $restController,
+        \StripeIntegration\Payments\Helper\Error $errorHelper,
         \StripeIntegration\Payments\Model\StripeCustomerFactory $stripeCustomerModelFactory,
         \StripeIntegration\Payments\Model\Checkout\Flow $checkoutFlow
     ) {
@@ -154,7 +154,7 @@ class Generic
         $this->logger = $logger;
         $this->configFactory = $configFactory;
         $this->stripePaymentMethodFactory = $stripePaymentMethodFactory;
-        $this->restController = $restController;
+        $this->errorHelper = $errorHelper;
         $this->stripeCustomerModelFactory = $stripeCustomerModelFactory;
         $this->tokenHelper = $tokenHelper;
         $this->checkoutFlow = $checkoutFlow;
@@ -464,7 +464,7 @@ class Generic
             }
             else
             {
-                $this->restController->setDisplay(true);
+                $this->errorHelper->setDisplay(true);
                 throw new CouldNotSaveException(__($this->cleanError($msg)), $e);
             }
         }
