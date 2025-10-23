@@ -938,7 +938,7 @@ class Generic
                 {
                     // Case with a regular item and a subscription with PaymentElement, before the webhook arrives.
                     $humanReadableAmount = $this->currencyHelper->formatStripePrice($stripeAmount, $charge->currency);
-                    $msg = __("%1 has already captured via Stripe. The invoice was in Pending status, likely because a webhook could not be delivered to your website. Capturing %1 offline instead.", $humanReadableAmount);
+                    $msg = __("%1 was already captured via Stripe. The invoice was in Pending status, likely because a webhook could not be delivered to your website. Capturing %1 offline instead.", $humanReadableAmount);
                 }
                 else
                     $msg = __("%1 could not be captured online because it was already captured via Stripe. Capturing %1 offline instead.", $humanReadableAmount);
