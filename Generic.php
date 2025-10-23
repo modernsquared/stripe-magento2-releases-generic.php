@@ -542,8 +542,6 @@ class Generic
 
     public function cancelOrCloseOrder($order, $refundInvoices = false, $refundOffline = true)
     {
-        $canceled = false;
-
         // When in Authorize & Capture, uncaptured invoices exist, so we should cancel them first
         foreach($order->getInvoiceCollection() as $invoice)
         {
@@ -554,7 +552,6 @@ class Generic
             {
                 $invoice->cancel();
                 $this->saveInvoice($invoice);
-                $canceled = true;
             }
             else if ($refundInvoices)
             {
@@ -562,20 +559,13 @@ class Generic
                 $creditmemo->setInvoice($invoice);
                 $this->creditmemoService->refund($creditmemo, $refundOffline);
                 $this->saveCreditmemo($creditmemo);
-                $canceled = true;
             }
         }
 
-        // When there are no invoices, the order can be canceled
-        if ($order->canCancel())
-        {
-            $order->cancel();
-            $canceled = true;
-        }
-
+        // If invoices were canceled/refunded, a save is needed before canceling the order
         $this->orderHelper->saveOrder($order);
 
-        return $canceled;
+        return $this->orderHelper->cancel($order);
     }
 
     public function maskError($msg)
@@ -1405,9 +1395,14 @@ class Generic
             if (isset($orders[$orderId]))
                 continue;
 
-            $order = $this->orderHelper->loadOrderById($orderId);
-            if ($order && $order->getId())
-                $orders[$orderId] = $order;
+            try
+            {
+                $orders[$orderId] = $this->orderHelper->loadOrderById($orderId);
+            }
+            catch (\Magento\Framework\Exception\NoSuchEntityException $e)
+            {
+                continue;
+            }
         }
 
         return $orders;
